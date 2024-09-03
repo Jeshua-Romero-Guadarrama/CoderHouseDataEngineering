@@ -1,0 +1,6 @@
+apache-airflow==2.1.0
+pandas
+numpy
+requests
+tqdm
+psycopg2-binary
