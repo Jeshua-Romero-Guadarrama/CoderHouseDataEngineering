@@ -4,7 +4,7 @@ services:
   webserver:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dockerfile
     container_name: airflow_webserver
     restart: always
     ports:
@@ -13,7 +13,6 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=sqlite:////app/airflow/airflow.db
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
-      - AIRFLOW__WEBSERVER__RBAC=True
       - AIRFLOW_HOME=/app/airflow
     volumes:
       - ./dags:/app/dags
@@ -21,13 +20,13 @@ services:
       - ./plugins:/app/airflow/plugins
     command: >
       bash -c "
-      airflow db init &&
-      airflow webserver"
+      airflow db migrate &&
+      airflow api-server --port 8080"
 
   scheduler:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dockerfile
     container_name: airflow_scheduler
     restart: always
     depends_on:
@@ -36,7 +35,6 @@ services:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=sqlite:////app/airflow/airflow.db
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
-      - AIRFLOW__WEBSERVER__RBAC=True
       - AIRFLOW_HOME=/app/airflow
     volumes:
       - ./dags:/app/dags
@@ -44,7 +42,7 @@ services:
       - ./plugins:/app/airflow/plugins
     command: >
       bash -c "
-      airflow scheduler"
+      airflow scheduler & airflow dag-processor"
 
   postgres:
     image: postgres:13

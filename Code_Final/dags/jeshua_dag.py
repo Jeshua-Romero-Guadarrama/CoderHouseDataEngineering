@@ -1,6 +1,14 @@
+import os
+import sys
+from datetime import datetime, timedelta
+
 from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
-from datetime import datetime
+from airflow.providers.standard.operators.python import PythonOperator
+
+# El script ETL vive en /app (Docker) o en ../scripts (repositorio)
+sys.path.append('/app')
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'scripts'))
+from jeshua_script import main
 
 default_args = {
     'owner': 'airflow',
@@ -12,7 +20,7 @@ default_args = {
 dag = DAG(
     'daily_data_extraction',
     default_args=default_args,
-    schedule_interval='@daily',
+    schedule='@daily',
     catchup=False
 )
 
